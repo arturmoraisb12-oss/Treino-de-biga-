@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Treino Slim & Glúteos</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #ec4899;
+            --accent-hover: #db2777;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --border: #334155;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 90px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, #1e293b 0%, #31102f 100%);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        header h1 {
+            font-size: 1.4rem;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+        header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 8px;
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background-color: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+        }
+        .workout-section {
+            display: none;
+        }
+        .workout-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section-info {
+            background-color: rgba(236, 72, 153, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+        }
+        .exercise-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 14px;
+            transition: border-color 0.2s;
+        }
+        .exercise-card.completed {
+            border-color: var(--success);
+            opacity: 0.75;
+        }
+        .ex-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .ex-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .ex-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--success);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .ex-name {
+            font-weight: 700;
+            font-size: 1.05rem;
+            line-height: 1.3;
+        }
+        .ex-badge {
+            background-color: #334155;
+            color: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .ex-details {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .ex-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-yt {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #ef4444;
+            color: white;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .btn-rest {
+            background-color: #334155;
+            color: var(--text-main);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-rest:active {
+            background-color: var(--accent);
+        }
+        /* Timer Flutuante */
+        .timer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #1e293b;
+            border-top: 2px solid var(--accent);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 600px;
+            margin: 0 auto;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+        }
+        .timer-display {
+            font-size: 1.5rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            color: var(--accent);
+        }
+        .timer-controls button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-left: 6px;
+            cursor: pointer;
+        }
+        .timer-controls button.secondary {
+            background-color: #475569;
+        }
+        /* Calendário / Frequência */
+        .tracker-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .tracker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .stars-count {
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cal-day.done {
+            background-color: rgba(251, 191, 36, 0.15);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        .anim-box {
+            width: 100%;
+            height: 70px;
+            background: #0f172a;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border: 1px dashed #334155;
+            padding: 0 12px;
+        }
+        .pulse-dot {
+            width: 14px;
+            height: 14px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            animation: pulseAnim 1.5s infinite ease-in-out;
+        }
+        @keyframes pulseAnim {
+            0%, 100% { transform: scale(0.8); opacity: 0.6; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+        .anim-text {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>✨ Treino Slim & Glúteos</h1>
+        <p>Foco em definição, glúteos e membros inferiores (35–40 min)</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('treinoA', this)">Treino A (Glúteo)</button>
+        <button class="tab-btn" onclick="switchTab('treinoB', this)">Treino B (Pernas)</button>
+        <button class="tab-btn" onclick="switchTab('treinoC', this)">Treino C (Full/Slim)</button>
+        <button class="tab-btn" onclick="switchTab('freq', this)">⭐ Frequência</button>
+    </div>
+
+    <!-- TREINO A -->
+    <div id="treinoA" class="workout-section active">
+        <div class="section-info">
+            <strong>Foco A:</strong> Glúteos e Posteriores + Alongamento Específico. Descanso de 45s a 60s.
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">1. Elevação Pélvica (Barra ou Máquina)</span>
+                </div>
+                <span class="ex-badge">4x 10-12</span>
+            </div>
+            <div class="anim-box">
+                <div class="pulse-dot"></div>
+                <div class="anim-text"><strong>Ritmo:</strong> Sobe rápido, segura 2s contraindo no topo, desce controlado.</div>
+            </div>
+            <div class="ex-details">Queixo no peito, calcanhares firmes no chão. Não hiperestenda a lombar.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=elevacao+pelvica+execucao+correta" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(60)">⏱ Descanso 60s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">2. Cadeira Abdutora (Tronco Inclinado)</span>
+                </div>
+                <span class="ex-badge">3x 15</span>
+            </div>
+            <div class="anim-box">
+                <div class="pulse-dot"></div>
+                <div class="anim-text"><strong>Ritmo:</strong> Abre com força, segura 1s aberto e volta devagar sem bater peso.</div>
+            </div>
+            <div class="ex-details">Incline o tronco levemente à frente para ativar ainda mais o glúteo médio.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=cadeira+abdutora+tronco+inclinado" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(45)">⏱ Descanso 45s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">3. Stiff com Halteres ou Barra</span>
+                </div>
+                <span class="ex-badge">3x 12</span>
+            </div>
+            <div class="anim-box">
+                <div class="pulse-dot"></div>
+                <div class="anim-text"><strong>Ritmo:</strong> Desce em 3s empurrando o quadril para trás, sobe em 1s.</div>
+            </div>
+            <div class="ex-details">Coluna totalmente reta, joelhos semi-flexionados. Sinta alongar o posterior da coxa.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=stiff+com+halteres+execucao" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(60)">⏱ Descanso 60s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">4. Glúteo Coice na Polia Baixa</span>
+                </div>
+                <span class="ex-badge">3x 12 cada</span>
+            </div>
+            <div class="ex-details">Tronco levemente inclinado, abdômen travado. Chute para trás e um pouco para cima.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=gluteo+coice+na+polia+execucao" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(45)">⏱ Descanso 45s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">5. Remada Baixa Triângulo (Postura Slim)</span>
+                </div>
+                <span class="ex-badge">3x 12</span>
+            </div>
+            <div class="ex-details">Apenas para manter postura elegante e costas definidas sem ganhar volume excessivo.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=remada+baixa+triangulo+execucao" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(45)">⏱ Descanso 45s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">6. Alongamento Final: Figura 4 + Posterior</span>
+                </div>
+                <span class="ex-badge">2x 30s</span>
+            </div>
+            <div class="ex-details">Deitada, cruze um tornozelo sobre o joelho oposto e puxe a coxa (alonga glúteo profundo). Depois alongue posteriores.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=alongamento+gluteo+figura+4" target="_blank" class="btn-yt">▶ Ver Alongamento</a>
+                <button class="btn-rest" onclick="startTimer(30)">⏱ Contar 30s</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TREINO B -->
+    <div id="treinoB" class="workout-section">
+        <div class="section-info">
+            <strong>Foco B:</strong> Quadríceps, Interior de Coxa e Abdômen. Mantenha intensidade constante!
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">1. Agachamento Sumô com Halter</span>
+                </div>
+                <span class="ex-badge">4x 12</span>
+            </div>
+            <div class="ex-details">Pés bem afastados e pontas apontadas para fora. Desça fundo mantendo o tronco reto.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=agachamento+sumo+com+halter" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(60)">⏱ Descanso 60s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">2. Leg Press 45° (Pés Mais Altos)</span>
+                </div>
+                <span class="ex-badge">3x 12-15</span>
+            </div>
+            <div class="ex-details">Coloque os pés um pouco mais no alto da plataforma para ativar glúteos junto com quadríceps.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=leg+press+45+execucao+correta" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(60)">⏱ Descanso 60s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">3. Cadeira Extensora</span>
+                </div>
+                <span class="ex-badge">3x 12 + 10s iso</span>
+            </div>
+            <div class="ex-details">Na última repetição de cada série, segure as pernas esticadas no alto por 10 segundos.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=cadeira+extensora+execucao" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(45)">⏱ Descanso 45s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">4. Cadeira Adutora (Parte Interna)</span>
+                </div>
+                <span class="ex-badge">3x 15</span>
+            </div>
+            <div class="ex-details">Feche devagar controlando o retorno para definir a parte interna da coxa.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=cadeira+adutora+execucao" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(45)">⏱ Descanso 45s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">5. Prancha Abdominal Isométrica</span>
+                </div>
+                <span class="ex-badge">3x 35-45s</span>
+            </div>
+            <div class="ex-details">Contraia glúteos e umbigo para dentro para afinar a linha de cintura (ativa o transverso).</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=prancha+abdominal+execucao+correta" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(40)">⏱ Contar 40s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">6. Alongamento: Flexores de Quadril + Borboleta</span>
+                </div>
+                <span class="ex-badge">2x 30s</span>
+            </div>
+            <div class="ex-details">Posição de avanço com joelho de trás no chão (alonga frente da coxa/quadril) + posição borboleta sentado.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=alongamento+flexores+quadril+borboleta" target="_blank" class="btn-yt">▶ Ver Alongamento</a>
+                <button class="btn-rest" onclick="startTimer(30)">⏱ Contar 30s</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TREINO C -->
+    <div id="treinoC" class="workout-section">
+        <div class="section-info">
+            <strong>Foco C:</strong> Metabólico + Glúteos e Superiores Leves (Visual Slim & Tonificado).
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">1. Afundo ou Búlgaro com Halteres</span>
+                </div>
+                <span class="ex-badge">3x 10 cada</span>
+            </div>
+            <div class="ex-details">Excelente para modelar glúteos e coxas. Dê um passo largo e desça verticalmente.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=afundo+com+halteres+execucao+gluteo" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(60)">⏱ Descanso 60s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">2. Mesa Flexora</span>
+                </div>
+                <span class="ex-badge">3x 12-15</span>
+            </div>
+            <div class="ex-details">Mantenha o quadril bem colado no banco sem levantar o bumbum ao puxar o peso.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=mesa+flexora+execucao+correta" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(45)">⏱ Descanso 45s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">3. Puxada Frontal Aberta (Polia)</span>
+                </div>
+                <span class="ex-badge">3x 12</span>
+            </div>
+            <div class="ex-details">Carga leve a moderada para desenhar as costas e deixar a cintura visualmente mais fina.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=puxada+frontal+aberta+execucao" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(45)">⏱ Descanso 45s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">4. Elevação Lateral com Halteres Leves</span>
+                </div>
+                <span class="ex-badge">3x 15</span>
+            </div>
+            <div class="ex-details">Define os ombros de forma delicada e feminina sem hipertrofia pesada.</div>
+            <div class="ex-actions">
+                <a href="https://www.youtube.com/results?search_query=elevacao+lateral+halteres+execucao" target="_blank" class="btn-yt">▶ Ver Execução</a>
+                <button class="btn-rest" onclick="startTimer(40)">⏱ Descanso 40s</button>
+            </div>
+        </div>
+
+        <div class="exercise-card">
+            <div class="ex-header">
+                <div class="ex-title-group">
+                    <input type="checkbox" class="ex-checkbox" onchange="toggleComplete(this)">
+                    <span class="ex-name">5. Cardio Final: Escada ou Esteira Inclinada</span>
+                </div>
+                <span class="ex-badge">10 min</span>
+            </div>
+            <div class="ex-details">Ritmo moderado (sem correr) para acelerar a queima de gordura mantendo a massa magra.</div>
+            <div class="ex-actions">
+                <button class="btn-rest" onclick="startTimer(600)">⏱ Cronometrar 10 min</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ABA FREQUÊNCIA -->
+    <div id="freq" class="workout-section">
+        <div class="tracker-box">
+            <div class="tracker-header">
+                <div>
+                    <h3>Calendário de Constância</h3>
+                    <p style="font-size: 0.8rem; color: var(--text-muted);">Toque no dia que você treinou para ganhar ⭐</p>
+                </div>
+                <div class="stars-count" id="starCounter">0 ⭐</div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <button onclick="resetCalendar()" style="margin-top: 16px; background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; cursor: pointer;">Limpar Mês</button>
+        </div>
+    </div>
+
+    <!-- BARRA DE CRONÔMETRO -->
+    <div class="timer-bar">
+        <div>
+            <div style="font-size: 0.7rem; color: var(--text-muted);">CRONÔMETRO DE DESCANSO</div>
+            <div class="timer-display" id="timerDisplay">00:00</div>
+        </div>
+        <div class="timer-controls">
+            <button onclick="startTimer(45)">45s</button>
+            <button onclick="startTimer(60)">60s</button>
+            <button class="secondary" onclick="stopTimer()">Zerar</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.workout-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function toggleComplete(checkbox) {
+            const card = checkbox.closest('.exercise-card');
+            if (checkbox.checked) {
+                card.classList.add('completed');
+            } else {
+                card.classList.remove('completed');
+            }
+        }
+
+        let timerInterval;
+        let timeLeft = 0;
+
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+            const secs = String(timeLeft % 60).padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${mins}:${secs}`;
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    alert("⏰ Tempo de descanso finalizado! Bora para a próxima série!");
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 0;
+            updateTimerDisplay();
+        }
+
+        // Calendário com Estrelas (Salvo no navegador)
+        const grid = document.getElementById('calendarGrid');
+        const starCounter = document.getElementById('starCounter');
+        let savedDays = JSON.parse(localStorage.getItem('treinoSlimDays') || '[]');
+
+        function renderCalendar() {
+            grid.innerHTML = '';
+            for (let i = 1; i <= 30; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'cal-day' + (savedDays.includes(i) ? ' done' : '');
+                dayEl.innerHTML = `<span>Dia ${i}</span><span>${savedDays.includes(i) ? '⭐' : '·'}</span>`;
+                dayEl.onclick = () => toggleDay(i);
+                grid.appendChild(dayEl);
+            }
+            starCounter.textContent = `${savedDays.length} ⭐`;
+        }
+
+        function toggleDay(day) {
+            if (savedDays.includes(day)) {
+                savedDays = savedDays.filter(d => d !== day);
+            } else {
+                savedDays.push(day);
+            }
+            localStorage.setItem('treinoSlimDays', JSON.stringify(savedDays));
+            renderCalendar();
+        }
+
+        function resetCalendar() {
+            if (confirm("Deseja zerar as estrelas deste ciclo de 30 dias?")) {
+                savedDays = [];
+                localStorage.setItem('treinoSlimDays', JSON.stringify(savedDays));
+                renderCalendar();
+            }
+        }
+
+        renderCalendar();
+    </script>
+</body>
+</html>
